@@ -108,7 +108,7 @@ You can find the discussion around this project [here](https://community.ipfire.
 
 ## Thanks
 
-Huge thanks to __siosios__ for his work on the Netdata package for IPFire!
+Huge thanks to __siosios__ for his work on the Netdata package for [IPFire](https://www.ipfire.org/)!
 
 ## Author
 
