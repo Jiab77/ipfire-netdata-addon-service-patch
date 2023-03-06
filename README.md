@@ -67,9 +67,20 @@ Once done, simply reload the page(s).
 
 The Netdata service will be added to the IPFire services page by injecting a custom line inside the `CGI` file.
 
+> __WARNING__
+>
+> Don't run the following commands at the moment!
+>
+> 1. `./install.sh -s add`
+> 2. `./install.sh -s rm`
+>
+> __These commands might break your IPFire installation, so please, really, don't run them!__
+>
+> (_Both exists in the script but they are not ready to use for the moment_)
+
 Here is how it works:
 
-* Install the patch
+* Install the patch (__don't use it for the moment__)
 
 ```console
 # cd ipfire-netdata-addon-service-patch
@@ -78,7 +89,7 @@ Here is how it works:
 
 > You can also use `--service` if you prefer the long version.
 
-* Remove the patch
+* Remove the patch (__don't use it for the moment__)
 
 ```console
 # cd ipfire-netdata-addon-service-patch
