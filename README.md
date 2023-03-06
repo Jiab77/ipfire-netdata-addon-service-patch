@@ -93,7 +93,7 @@ Here is how it works:
 
 ```console
 # cd ipfire-netdata-addon-service-patch
-# ./install.sh -s remove
+# ./install.sh -s rm (or 'remove')
 ```
 
 > You can also use `--service` if you prefer the long version.
