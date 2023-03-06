@@ -15,16 +15,19 @@ Simple patch for adding Netdata add-on service to the IPFire web interface.
 * [Thanks](#thanks)
 * [Author](#author)
 
+---
+
 ## Current version
 
-The current version is __`0.0.0`__ so expect some bugs 😅
+The current version is __`0.1.0`__.
 
 ## Features
 
 The installer script will allow you to do the following:
 
 * Install / Update / Remove the add-on
-* Add / Remove the patch on the __services__ page
+* Add / Remove the patch on the __services__ page (__not implemented yet__)
+* Test the Netdata service
 
 ## Installation
 
@@ -84,10 +87,19 @@ Here is how it works:
 
 > You can also use `--service` if you prefer the long version.
 
+* Test the service
+
+```console
+# cd ipfire-netdata-addon-service-patch
+# ./install.sh -s test
+```
+
+> You can also use `--service` if you prefer the long version.
+
 ## Roadmap
 
 * [X] Create initial version
-* [ ] Make the script better
+* [X] Make the script better
 * [ ] See if the _kickstart_ method can be supported
 
 ## Community
