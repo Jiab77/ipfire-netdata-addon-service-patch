@@ -111,6 +111,7 @@ Here is how it works:
 
 * [X] Create initial version
 * [X] Make the script better
+* [ ] Finish the `service` code
 * [ ] See if the _kickstart_ method can be supported
 
 ## Community
