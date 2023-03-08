@@ -289,6 +289,7 @@ That's all! Hope that all of this could have been helpful for everyone. 🙇‍�
 * [X] Create initial version
 * [X] Make the script better
 * [X] Fix permissions issues
+* [ ] Implement __script__ `update` feature
 * [ ] Finish the `service` code
 * [ ] See if the _kickstart_ method can be supported
 
