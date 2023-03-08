@@ -6,7 +6,7 @@
 #
 # Based on the work made by siosios
 #
-# Version 0.2.0
+# Version 0.2.1
 
 # Options
 set +o xtrace
@@ -29,6 +29,7 @@ REMOVE_MODE=false
 UPDATE_MODE=false
 SERVICE_MODE=false
 FIX_MODE=false
+FIX_PERMS_DURING_INSTALL=true
 DO_INSTALLER_UPDATE=false
 BIN_GIT=$(which git 2>/dev/null)
 BASE_DIR=$(dirname "$0")
@@ -78,7 +79,9 @@ function sanity_check() {
 function fix_perms() {
     local FILES_WITH_WRONG_OWNERSHIP
 
-    FILES_WITH_WRONG_OWNERSHIP=$(find "$NETDATA_INSTALL_PATH" -group 999 -ls 2>/dev/null | wc -l)
+    echo -e "${YELLOW}Fixing ${PURPLE}Netdata${YELLOW} permissions...${NC}${NL}"
+
+    FILES_WITH_WRONG_OWNERSHIP=$(find "$NETDATA_INSTALL_PATH" -group 999 2>/dev/null | wc -l)
 
     # Stop Netdata
     echo -e "${WHITE}Stopping ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
@@ -86,11 +89,11 @@ function fix_perms() {
     sleep 1
 
     # Lookup for files with wrong ownership
-    echo -en "${WHITE}Searching for ${PURPLE}Netdata${WHITE} files with wrong ownership...${NC}"
+    echo -en "${NL}${WHITE}Searching for ${PURPLE}Netdata${WHITE} files with wrong ownership...${NC}"
     if [[ $FILES_WITH_WRONG_OWNERSHIP -eq 0 ]]; then
         echo -e " ${GREEN}${FILES_WITH_WRONG_OWNERSHIP}${NC}${NL}"
     else
-        echo -e " ${RED}${FILES_WITH_WRONG_OWNERSHIP}${NC}${NL}"
+        echo -e " ${RED}${FILES_WITH_WRONG_OWNERSHIP}${WHITE} impacted files found.${NC}${NL}"
 
         # Fix impacted files
         echo -en "${WHITE}Fixing impacted ${PURPLE}Netdata${WHITE} files...${NC}"
@@ -119,21 +122,27 @@ function fix_perms() {
         echo -e "${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
         /etc/init.d/netdata start
         sleep 1
+
+        # Show Netdata service status
+        echo -e "${NL}${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
         /etc/init.d/netdata status
+
         echo -e "${NL}${WHITE}Done.${NC}${NL}"
     fi
 }
 function backup_existing_config() {
     local NETDATA_CONFIG_FILES
 
+    echo -e "${YELLOW}Backup ${PURPLE}Netdata${YELLOW} config files...${NC}${NL}"
+
     NETDATA_CONFIG_FILES=$(find "$NETDATA_INSTALL_PATH"/etc/netdata -maxdepth 1 -type f -iname "*.conf" 2>/dev/null | wc -l)
 
     # Lookup for netdata config files
-    echo -en "${WHITE}Searching for ${PURPLE}Netdata${WHITE} config files to backup...${NC}${NL}"
+    echo -en "${WHITE}Searching for ${PURPLE}Netdata${WHITE} config files to backup...${NC}"
     if [[ $NETDATA_CONFIG_FILES -eq 0 ]]; then
         echo -e " ${BLUE}nothing${NC}${NL}"
     else
-        echo -e " ${YELLOW}${NETDATA_CONFIG_FILES}${WHITE} files found${NC}${NL}"
+        echo -e " ${YELLOW}${NETDATA_CONFIG_FILES}${WHITE} files found.${NC}${NL}"
 
         # Copy found netdata config files
         echo -en "${WHITE}Copying found ${PURPLE}Netdata${WHITE} config files...${NC}"
@@ -155,14 +164,16 @@ function backup_existing_config() {
 function restore_existing_config() {
     local NETDATA_CONFIG_FILES
 
+    echo -e "${YELLOW}Restore ${PURPLE}Netdata${YELLOW} config files...${NC}${NL}"
+
     NETDATA_CONFIG_FILES=$(find "$NETDATA_BACKUP_PATH" -maxdepth 1 -type f -iname "*.conf" 2>/dev/null | wc -l)
 
     # Lookup for netdata config files
-    echo -en "${WHITE}Searching for ${PURPLE}Netdata${WHITE} config files to restore...${NC}${NL}"
+    echo -en "${WHITE}Searching for ${PURPLE}Netdata${WHITE} config files to restore...${NC}"
     if [[ $NETDATA_CONFIG_FILES -eq 0 ]]; then
         echo -e " ${BLUE}nothing${NC}${NL}"
     else
-        echo -e " ${YELLOW}${NETDATA_CONFIG_FILES}${WHITE} files found${NC}${NL}"
+        echo -e " ${YELLOW}${NETDATA_CONFIG_FILES}${WHITE} files found.${NC}${NL}"
 
         # Restore found netdata config files
         echo -en "${WHITE}Restoring found ${PURPLE}Netdata${WHITE} config files...${NC}"
@@ -286,7 +297,7 @@ function install_addon() {
     restore_existing_config
 
     # Run permissions fix
-    fix_perms
+    [[ $FIX_PERMS_DURING_INSTALL == true ]] && fix_perms
 }
 function remove_addon() {
     bootstrap
@@ -306,7 +317,7 @@ function update_addon() {
     echo -e "${NL}${WHITE}Done.${NC}${NL}"
 }
 function clean_addon() {
-    echo -en "${WHITE}Removing everything left behind the ${PURPLE}Netdata${WHITE} add-on...${NC}${NL}"
+    echo -en "${WHITE}Removing everything left behind the ${PURPLE}Netdata${WHITE} add-on...${NC}"
     rm -rf "$NETDATA_INSTALL_PATH"
     RET_CODE_CLEAN=$?
     if [[ $RET_CODE_CLEAN -eq 0 ]]; then
@@ -488,6 +499,7 @@ fi
 [[ $1 == "-u" || $1 == "--update" ]] && UPDATE_MODE=true
 [[ $1 == "-s" || $1 == "--service" ]] && SERVICE_MODE=true
 [[ $1 == "-f" || $1 == "--fix-perms" ]] && FIX_MODE=true
+[[ $2 == "--no-fix" ]] && FIX_PERMS_DURING_INSTALL=false
 [[ $1 == "-v" || $1 == "--version" ]] && get_installer_version && exit 1
 [[ $1 == "-c" || $1 == "--changelog" ]] && get_change_log && exit 1
 
