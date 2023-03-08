@@ -251,7 +251,7 @@ If you want to fix your current installation, you just need to run the following
 
 ```console
 # cd ~/ipfire-netdata-addon-service-patch
-./install.sh -f
+# ./install.sh -f
 ```
 
 > You can also use `--fix-perms` instead if you prefer long arguments.
@@ -260,7 +260,7 @@ Or if you want to be more radical and reset your Netdata installation, you can r
 
 ```console
 # cd ~/ipfire-netdata-addon-service-patch
-./install.sh -R
+# ./install.sh -R
 ```
 
 > You can also use `--reset` instead if you prefer long arguments.
@@ -269,7 +269,7 @@ If for whatever reasons you want to reset your Netdata installation __without__ 
 
 ```console
 # cd ~/ipfire-netdata-addon-service-patch
-./install.sh -R --no-fix
+# ./install.sh -R --no-fix
 ```
 
 That's all! Hope that all of this could have been helpful for everyone. 🙇‍♂️
