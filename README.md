@@ -2,13 +2,12 @@
 
 Simple patch for adding Netdata add-on service to the IPFire web interface.
 
-## Current version
+## Current version <!-- omit from toc -->
 
 The current version is __`0.2.1`__.
 
 ## Content <!-- omit from toc -->
 
-* [Current version](#current-version)
 * [Features](#features)
 * [Installation](#installation)
 * [Update](#update)
