@@ -25,6 +25,8 @@ The current version is __`0.2.1`__.
 * [Thanks](#thanks)
 * [Author](#author)
 
+---
+
 ## Features
 
 The installer script will allow you to do the following:
