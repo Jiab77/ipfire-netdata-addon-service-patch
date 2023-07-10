@@ -10,7 +10,7 @@
 # - Implement script update...
 # - Implement better service page code
 #
-# Version 0.2.3
+# Version 0.2.4
 
 # Options
 set +o xtrace
@@ -78,6 +78,19 @@ function sanity_check() {
         exit 1
     else
         echo -e " ${GREEN}passed${NC}${NL}"
+    fi
+}
+function create_tmp_dir() {
+    if [[ ! -d $PAKFIRE_INSTALL_PATH ]]; then
+        echo -en "${YELLOW}Creating missing '${PURPLE}${PAKFIRE_INSTALL_PATH}${YELLOW} directory...${NC}"
+        mkdir -p $PAKFIRE_INSTALL_PATH
+        RET_CODE_CREATE=$?
+        if [[ $RET_CODE_CREATE -eq 0 ]]; then
+            echo -e " ${GREEN}done${NC}${NL}"
+        else
+            echo -e " ${RED}failed${NC}${NL}"
+            exit 1
+        fi
     fi
 }
 function fix_perms() {
@@ -200,7 +213,8 @@ function install_elfutils() {
     local ELFUTILS_VERSION
 
     echo -e "${WHITE}Installing required ${PURPLE}elfutils${WHITE} add-on...${NC}${NL}"
-    pakfire install elfutils
+    pakfire install -y elfutils
+    sleep 1
 
     echo -en "${WHITE}Verifying ${PURPLE}elfutils${WHITE} add-on installation...${NC}"
     if [[ $(pakfire list installed --no-colors | grep -ci elf) -eq 0 ]]; then
@@ -279,6 +293,7 @@ function unpack_addon() {
     fi
 }
 function bootstrap() {
+    create_tmp_dir
     detect_addon
     download_addon
     test_addon
