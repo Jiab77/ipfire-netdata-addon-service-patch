@@ -10,7 +10,7 @@
 # - Implement script update...
 # - Implement better service page code
 #
-# Version 0.2.6
+# Version 0.2.7
 
 # Options
 set -o xtrace
@@ -82,7 +82,7 @@ function sanity_check() {
 }
 function create_tmp_dir() {
     if [[ ! -d $PAKFIRE_INSTALL_PATH ]]; then
-        echo -en "${YELLOW}Creating missing '${PURPLE}${PAKFIRE_INSTALL_PATH}${YELLOW} directory...${NC}"
+        echo -en "${YELLOW}Creating missing '${PURPLE}${PAKFIRE_INSTALL_PATH}${YELLOW}' directory...${NC}"
         mkdir -p $PAKFIRE_INSTALL_PATH
         RET_CODE_CREATE=$?
         if [[ $RET_CODE_CREATE -eq 0 ]]; then
