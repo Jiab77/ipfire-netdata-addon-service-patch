@@ -4,7 +4,7 @@ Simple patch for adding Netdata add-on service to the IPFire web interface.
 
 ## Current versions <!-- omit from toc -->
 
-* Script: __`0.2.2`__
+* Script: __`0.2.3`__
 * Netdata: __[1.40.0-1](https://github.com/siosios/Netdata-on-Ipfire/tree/main/core175)__
 
 ## Content <!-- omit from toc -->

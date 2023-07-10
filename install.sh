@@ -10,7 +10,7 @@
 # - Implement script update...
 # - Implement better service page code
 #
-# Version 0.2.2
+# Version 0.2.3
 
 # Options
 set +o xtrace
@@ -40,7 +40,7 @@ BASE_DIR=$(dirname "$0")
 PAKFIRE_INSTALL_PATH="/opt/pakfire/tmp"
 NETDATA_INSTALL_PATH="/opt/netdata"
 NETDATA_BACKUP_PATH="/root/netdata-config-files"
-GITHUB_PATH="https://github.com/siosios/Netdata-on-Ipfire/raw/main/core%20"
+GITHUB_PATH="https://github.com/siosios/Netdata-on-Ipfire/raw/main/core"
 IPFIRE_VERSION=$(awk '{ print $2 }' 2>/dev/null </etc/system-release)
 IPFIRE_PLATFORM=$(awk '{ print $3 }' 2>/dev/null </etc/system-release | sed -e 's/(//' -e 's/)//')
 IPFIRE_PATCH=$(awk '{ print $5 }' 2>/dev/null </etc/system-release | sed -e 's/core//')
@@ -513,12 +513,12 @@ fi
 [[ $# -gt 2 ]] && echo -e "${RED}Error: ${YELLOW}Too many arguments.${NC}${NL}" && exit 1
 
 # Main
-if [[ $REMOVE_MODE == true ]]; then
+if [[ $RESET_MODE == true ]]; then
+    reset_addon
+elif [[ $REMOVE_MODE == true ]]; then
     remove_addon
 elif [[ $UPDATE_MODE == true ]]; then
     update_addon
-elif [[ $RESET_MODE == true ]]; then
-    reset_addon
 elif [[ $SERVICE_MODE == true ]]; then
     [[ $2 == "add" ]] && SERVICE_OP="add"
     [[ $2 == "rm" || $2 == "remove" ]] && SERVICE_OP="remove"
