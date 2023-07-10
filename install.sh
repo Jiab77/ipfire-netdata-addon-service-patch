@@ -13,7 +13,7 @@
 # Version 0.2.10
 
 # Options
-set -o xtrace
+set +o xtrace
 
 # Colors
 NC="\033[0m"
