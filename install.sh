@@ -10,7 +10,7 @@
 # - Implement script update...
 # - Implement better service page code
 #
-# Version 0.2.10
+# Version 0.2.11
 
 # Options
 set +o xtrace
@@ -27,13 +27,16 @@ PURPLE="\033[1;35m"
 
 # Config
 DEBUG_MODE=false
+FIX_PERMS_DURING_INSTALL=false
+LATEST_NETDATA_VERSION="1.40.0-1"
+
+# Internals
 NO_HEADER=false
 RESET_MODE=false
 REMOVE_MODE=false
 UPDATE_MODE=false
 SERVICE_MODE=false
 FIX_MODE=false
-FIX_PERMS_DURING_INSTALL=true
 DO_INSTALLER_UPDATE=false
 BIN_GIT=$(which git 2>/dev/null)
 BASE_DIR=$(dirname "$0")
@@ -45,7 +48,6 @@ IPFIRE_VERSION=$(awk '{ print $2 }' 2>/dev/null </etc/system-release)
 IPFIRE_PLATFORM=$(awk '{ print $3 }' 2>/dev/null </etc/system-release | sed -e 's/(//' -e 's/)//')
 IPFIRE_PATCH=$(awk '{ print $5 }' 2>/dev/null </etc/system-release | sed -e 's/core//')
 CURRENT_NETDATA_VERSION=$("$NETDATA_INSTALL_PATH"/usr/sbin/netdatacli version 2>/dev/null | awk '{ print $2 }' | sed -e 's/v//i')
-LATEST_NETDATA_VERSION="1.40.0-1"
 LATEST_NETDATA_VERSION_TRIMMED="${LATEST_NETDATA_VERSION//-1/}"
 
 # Functions
@@ -114,12 +116,6 @@ function fix_perms() {
         echo -e "${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
         /etc/init.d/netdata start
         sleep 5
-
-        # Show Netdata service status
-        echo -e "${NL}${WHITE}Checking ${PURPLE}Netdata${WHITE} service status...${NC}${NL}"
-        /etc/init.d/netdata status
-
-        echo -e "${NL}${WHITE}Done.${NC}${NL}"
     else
         echo -e " ${RED}${FILES_WITH_WRONG_OWNERSHIP}${WHITE} impacted files found.${NC}${NL}"
 
@@ -150,11 +146,13 @@ function fix_perms() {
         echo -e "${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
         /etc/init.d/netdata start
         sleep 5
+    fi
 
-        # Show Netdata service status
+    # End status when the method is ran in standalone way
+    if [[ $FIX_MODE == true ]]; then
+        # Show service status after install
         echo -e "${NL}${WHITE}Checking ${PURPLE}Netdata${WHITE} service status...${NC}${NL}"
         /etc/init.d/netdata status
-
         echo -e "${NL}${WHITE}Done.${NC}${NL}"
     fi
 }
@@ -329,6 +327,11 @@ function install_addon() {
 
     # Run permissions fix
     [[ $FIX_PERMS_DURING_INSTALL == true ]] && fix_perms
+
+    # Show service status after install
+    echo -e "${NL}${WHITE}Checking ${PURPLE}Netdata${WHITE} service status...${NC}${NL}"
+    /etc/init.d/netdata status
+    echo -e "${NL}${WHITE}Done.${NC}${NL}"
 }
 function remove_addon() {
     bootstrap
