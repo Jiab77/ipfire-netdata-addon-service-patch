@@ -293,7 +293,7 @@ That's all! Hope that all of this could have been helpful for everyone. 🙇‍�
 * [X] Fix permissions issues
 * [ ] Implement __script__ `update` feature
 * [ ] Finish the `service` code
-* [ ] See if the _kickstart_ method can be supported
+* [ ] See if the [kickstart](https://learn.netdata.cloud/docs/installing/one-line-installer-for-all-linux-systems) method can be supported
 
 ## Community
 
