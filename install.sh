@@ -10,7 +10,7 @@
 # - Implement script update...
 # - Implement better service page code
 #
-# Version 0.2.7
+# Version 0.2.8
 
 # Options
 set -o xtrace
@@ -109,6 +109,17 @@ function fix_perms() {
     echo -en "${NL}${WHITE}Searching for ${PURPLE}Netdata${WHITE} files with wrong ownership...${NC}"
     if [[ $FILES_WITH_WRONG_OWNERSHIP -eq 0 ]]; then
         echo -e " ${GREEN}${FILES_WITH_WRONG_OWNERSHIP}${NC}${NL}"
+
+        # Start Netdata
+        echo -e "${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
+        /etc/init.d/netdata start
+        sleep 1
+
+        # Show Netdata service status
+        echo -e "${NL}${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
+        /etc/init.d/netdata status
+
+        echo -e "${NL}${WHITE}Done.${NC}${NL}"
     else
         echo -e " ${RED}${FILES_WITH_WRONG_OWNERSHIP}${WHITE} impacted files found.${NC}${NL}"
 
