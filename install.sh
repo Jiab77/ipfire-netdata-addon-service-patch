@@ -10,7 +10,7 @@
 # - Implement script update...
 # - Implement better service page code
 #
-# Version 0.2.8
+# Version 0.2.9
 
 # Options
 set -o xtrace
@@ -103,7 +103,7 @@ function fix_perms() {
     # Stop Netdata
     echo -e "${WHITE}Stopping ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
     /etc/init.d/netdata stop
-    sleep 1
+    sleep 2
 
     # Lookup for files with wrong ownership
     echo -en "${NL}${WHITE}Searching for ${PURPLE}Netdata${WHITE} files with wrong ownership...${NC}"
@@ -113,10 +113,10 @@ function fix_perms() {
         # Start Netdata
         echo -e "${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
         /etc/init.d/netdata start
-        sleep 1
+        sleep 2
 
         # Show Netdata service status
-        echo -e "${NL}${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
+        echo -e "${NL}${WHITE}Checking ${PURPLE}Netdata${WHITE} service status...${NC}${NL}"
         /etc/init.d/netdata status
 
         echo -e "${NL}${WHITE}Done.${NC}${NL}"
@@ -149,10 +149,10 @@ function fix_perms() {
         # Start Netdata
         echo -e "${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
         /etc/init.d/netdata start
-        sleep 1
+        sleep 2
 
         # Show Netdata service status
-        echo -e "${NL}${WHITE}Starting ${PURPLE}Netdata${WHITE} service...${NC}${NL}"
+        echo -e "${NL}${WHITE}Checking ${PURPLE}Netdata${WHITE} service status...${NC}${NL}"
         /etc/init.d/netdata status
 
         echo -e "${NL}${WHITE}Done.${NC}${NL}"
