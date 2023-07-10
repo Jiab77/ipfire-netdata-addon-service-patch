@@ -6,7 +6,11 @@
 #
 # Based on the work made by siosios
 #
-# Version 0.2.1
+# TODO:
+# - Implement script update...
+# - Implement better service page code
+#
+# Version 0.2.2
 
 # Options
 set +o xtrace
@@ -41,7 +45,7 @@ IPFIRE_VERSION=$(awk '{ print $2 }' 2>/dev/null </etc/system-release)
 IPFIRE_PLATFORM=$(awk '{ print $3 }' 2>/dev/null </etc/system-release | sed -e 's/(//' -e 's/)//')
 IPFIRE_PATCH=$(awk '{ print $5 }' 2>/dev/null </etc/system-release | sed -e 's/core//')
 CURRENT_NETDATA_VERSION=$("$NETDATA_INSTALL_PATH"/usr/sbin/netdatacli version 2>/dev/null | awk '{ print $2 }' | sed -e 's/v//i')
-LATEST_NETDATA_VERSION="1.38.1-1"
+LATEST_NETDATA_VERSION="1.40.0-1"
 LATEST_NETDATA_VERSION_TRIMMED="${LATEST_NETDATA_VERSION//-1/}"
 
 # Functions

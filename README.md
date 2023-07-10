@@ -2,9 +2,10 @@
 
 Simple patch for adding Netdata add-on service to the IPFire web interface.
 
-## Current version <!-- omit from toc -->
+## Current versions <!-- omit from toc -->
 
-The current version is __`0.2.1`__.
+* Script: __`0.2.2`__
+* Netdata: __[1.40.0-1](https://github.com/siosios/Netdata-on-Ipfire/tree/main/core175)__
 
 ## Content <!-- omit from toc -->
 
@@ -300,7 +301,7 @@ You can find the discussion around this project [here](https://community.ipfire.
 
 ## Thanks
 
-Huge thanks to __siosios__ for his work on the Netdata package for [IPFire](https://www.ipfire.org/)!
+Huge thanks to [@siosios](https://github.com/siosios) for his work on the [Netdata package](https://github.com/siosios/Netdata-on-Ipfire) for [IPFire](https://www.ipfire.org/)!
 
 ## Author
 
