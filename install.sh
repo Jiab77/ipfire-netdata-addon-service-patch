@@ -10,7 +10,7 @@
 # - Implement script update...
 # - Implement better service page code
 #
-# Version 0.2.5
+# Version 0.2.6
 
 # Options
 set -o xtrace
@@ -300,6 +300,7 @@ function bootstrap() {
     unpack_addon
 }
 function install_addon() {
+    create_tmp_dir
     detect_elfutils
     bootstrap
 
