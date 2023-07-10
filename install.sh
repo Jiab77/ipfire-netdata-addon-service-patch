@@ -10,10 +10,10 @@
 # - Implement script update...
 # - Implement better service page code
 #
-# Version 0.2.4
+# Version 0.2.5
 
 # Options
-set +o xtrace
+set -o xtrace
 
 # Colors
 NC="\033[0m"
@@ -300,8 +300,8 @@ function bootstrap() {
     unpack_addon
 }
 function install_addon() {
-    bootstrap
     detect_elfutils
+    bootstrap
 
     if [[ -n $("$NETDATA_INSTALL_PATH"/usr/sbin/netdatacli version 2>/dev/null) ]]; then
         echo -e "${RED}Error: ${YELLOW}Netdata is already installed. Leaving...${NC}${NL}"
