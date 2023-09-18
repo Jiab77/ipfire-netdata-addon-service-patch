@@ -10,7 +10,7 @@
 # - Implement script update...
 # - Implement better service page code
 #
-# Version 0.2.11
+# Version 0.2.12
 
 # Options
 set +o xtrace
@@ -28,7 +28,7 @@ PURPLE="\033[1;35m"
 # Config
 DEBUG_MODE=false
 FIX_PERMS_DURING_INSTALL=false
-LATEST_NETDATA_VERSION="1.40.0-1"
+LATEST_NETDATA_VERSION="1.42.0-1"
 
 # Internals
 NO_HEADER=false
