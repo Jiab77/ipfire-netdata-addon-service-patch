@@ -13,7 +13,7 @@
 # Version 0.2.12
 
 # Options
-set +o xtrace
+[[ -r $HOME/.debug ]] && set -o xtrace || set +o xtrace
 
 # Colors
 NC="\033[0m"
@@ -28,7 +28,6 @@ PURPLE="\033[1;35m"
 # Config
 DEBUG_MODE=false
 FIX_PERMS_DURING_INSTALL=false
-LATEST_NETDATA_VERSION="1.42.0-1"
 
 # Internals
 NO_HEADER=false
@@ -48,6 +47,7 @@ IPFIRE_VERSION=$(awk '{ print $2 }' 2>/dev/null </etc/system-release)
 IPFIRE_PLATFORM=$(awk '{ print $3 }' 2>/dev/null </etc/system-release | sed -e 's/(//' -e 's/)//')
 IPFIRE_PATCH=$(awk '{ print $5 }' 2>/dev/null </etc/system-release | sed -e 's/core//')
 CURRENT_NETDATA_VERSION=$("$NETDATA_INSTALL_PATH"/usr/sbin/netdatacli version 2>/dev/null | awk '{ print $2 }' | sed -e 's/v//i')
+LATEST_NETDATA_VERSION="$(curl -sSL <url> | jq -r .version)"
 LATEST_NETDATA_VERSION_TRIMMED="${LATEST_NETDATA_VERSION//-1/}"
 
 # Functions
