@@ -4,8 +4,8 @@ Simple patch for adding Netdata add-on service to the IPFire web interface.
 
 ## Current versions <!-- omit from toc -->
 
-* Script: __`0.2.12`__
-* Netdata: __[1.42.0-1](https://github.com/siosios/Netdata-on-Ipfire/tree/main/core178)__
+* Script: __`0.3.0`__
+* Netdata: __[1.47.0-1](https://github.com/siosios/Netdata-on-Ipfire/tree/main/core189)__
 
 ## Content <!-- omit from toc -->
 
@@ -95,17 +95,11 @@ This feature should be ran automatically during the install process but if you h
 
 The Netdata service will be added to the IPFire services page by injecting a custom line inside the `CGI` file.
 
-> __WARNING__
+> __NOTE__
 >
-> Don't run the following commands at the moment!
->
-> 1. `./install.sh -s add`
-> 2. `./install.sh -s rm`
->
-> __These commands might break your IPFire installation, so please, really, don't run them!__
->
-> (_Both exists in the script but they are not ready to use for the moment_)
+> This feature has been removed from the script.
 
+<!--
 Here is how it works:
 
 * Install the patch (__don't use it for the moment__)
@@ -134,6 +128,7 @@ Here is how it works:
     ```
 
     > You can also use `--service` if you prefer the long version.
+-->
 
 ## Known issues
 
@@ -291,7 +286,7 @@ That's all! Hope that all of this could have been helpful for everyone. 🙇‍�
 * [X] Create initial version
 * [X] Make the script better
 * [X] Fix permissions issues
-* [ ] Implement __script__ `update` feature
+* [X] Implement __script__ `update` feature
 * [ ] Finish the `service` code
 * [ ] See if the [kickstart](https://learn.netdata.cloud/docs/installing/one-line-installer-for-all-linux-systems) method can be supported
 

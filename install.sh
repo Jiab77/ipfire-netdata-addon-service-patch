@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2034
+# shellcheck disable=SC2034,SC2015
 
 # Basic Netdata install/update/remove script for IPFire
-# Made by Jiab77 - 2023
+# Made by Jiab77 / 2023 - 2024
 #
 # Based on the work made by siosios
 #
-# TODO:
-# - Implement script update...
-# - Implement better service page code
-#
-# Version 0.2.12
+# Version 0.3.0
 
 # Options
 [[ -r $HOME/.debug ]] && set -o xtrace || set +o xtrace
@@ -34,29 +30,50 @@ NO_HEADER=false
 RESET_MODE=false
 REMOVE_MODE=false
 UPDATE_MODE=false
-SERVICE_MODE=false
+UPDATE_SCRIPT=false
 FIX_MODE=false
 DO_INSTALLER_UPDATE=false
-BIN_GIT=$(which git 2>/dev/null)
 BASE_DIR=$(dirname "$0")
 PAKFIRE_INSTALL_PATH="/opt/pakfire/tmp"
 NETDATA_INSTALL_PATH="/opt/netdata"
 NETDATA_BACKUP_PATH="/root/netdata-config-files"
-GITHUB_PATH="https://github.com/siosios/Netdata-on-Ipfire/raw/main/core"
+GITHUB_PATH="https://github.com/siosios/Netdata-on-Ipfire/raw/refs/heads/main/core"
 IPFIRE_VERSION=$(awk '{ print $2 }' 2>/dev/null </etc/system-release)
 IPFIRE_PLATFORM=$(awk '{ print $3 }' 2>/dev/null </etc/system-release | sed -e 's/(//' -e 's/)//')
 IPFIRE_PATCH=$(awk '{ print $5 }' 2>/dev/null </etc/system-release | sed -e 's/core//')
 CURRENT_NETDATA_VERSION=$("$NETDATA_INSTALL_PATH"/usr/sbin/netdatacli version 2>/dev/null | awk '{ print $2 }' | sed -e 's/v//i')
-LATEST_NETDATA_VERSION="$(curl -sSL <url> | jq -r .version)"
+LATEST_NETDATA_VERSION="$(curl -sSL https://raw.githubusercontent.com/Jiab77/ipfire-netdata-addon-service-patch/refs/heads/main/latest.json | jq -r .version 2>/dev/null)"
 LATEST_NETDATA_VERSION_TRIMMED="${LATEST_NETDATA_VERSION//-1/}"
 
 # Functions
+function die() {
+    echo -e "${NL}${RED}Error: ${YELLOW}$*${NC}${NL}" >&2
+    exit 255
+}
+function print_usage() {
+    echo -e "${NL}Usage: $(basename "$0") [-r|--remove, -R|--reset, -u|--update, -s|--script-update, -v|--version, -c|--changelog, -f|--fix-perms]${NL}"
+    exit
+}
+function check_deps() {
+    local BINARIES=(awk git jq sed wget)
+    local MISSING=0
+
+    for BIN in "${BINARIES[@]}"; do
+        if [[ -z $(which "$BIN" 2>/dev/null) ]]; then
+            ((MISSING++))
+        fi
+    done
+
+    if [[ $MISSING -ne 0 ]]; then
+        die "You must have 'awk', 'git', 'jq', 'sed' and 'wget' installed to run this script."
+    fi
+}
 function get_version() {
-    grep -i 'version' "$0" | awk '{ print $3 }' | head -n1
+    grep -i 'version' -m1 "$0" | cut -d" " -f3
 }
 function get_installer_version() {
     echo -en "${WHITE}Gathering local patch installer version...${NC}"
-    CURRENT_INSTALLER_VERSION=$(grep -i 'version' "$0" | awk '{ print $3 }' | head -n1)
+    CURRENT_INSTALLER_VERSION=$(get_version)
     if [[ -n $CURRENT_INSTALLER_VERSION ]]; then
         echo -e " ${GREEN}${CURRENT_INSTALLER_VERSION}${NC}${NL}"
     else
@@ -65,9 +82,6 @@ function get_installer_version() {
     fi
 }
 function get_change_log() {
-    # Detect if git is installed
-    [[ -z $BIN_GIT ]] && echo -e "${RED}Error: ${YELLOW}You must have 'git' installed to run this script.${NC}${NL}" && exit 1
-
     # Display latest changes
     echo -e "${WHITE}Loading changes summary...${NC}${NL}"
     git log -n5
@@ -76,8 +90,8 @@ function get_change_log() {
 function sanity_check() {
     echo -en "${WHITE}Running sanity check...${NC}"
     if [[ -z $LINE_TO_PATCH_POS ]]; then
-        echo -e "${NL}${NL}${RED}Error: ${YELLOW}Unable to find corresponding line. Leaving...${NC}${NL}"
-        exit 1
+        echo -e " ${RED}failed${NC}${NL}"
+        die "Unable to find corresponding line. Leaving..."
     else
         echo -e " ${GREEN}passed${NC}${NL}"
     fi
@@ -269,13 +283,15 @@ function detect_addon() {
 function download_addon() {
     echo -en "${WHITE}Downloading ${PURPLE}Netdata${WHITE} add-on...${NC}"
     cd "$PAKFIRE_INSTALL_PATH" || (echo -e " ${RED}failed${NC}${NL}" && exit 1)
-    wget "${GITHUB_PATH}${IPFIRE_PATCH}/netdata-${LATEST_NETDATA_VERSION}.ipfire" &>/dev/null
-    RET_CODE_DL=$?
-    if [[ $RET_CODE_DL -eq 0 ]]; then
-        echo -e " ${GREEN}done${NC}${NL}"
-    else
-        echo -e " ${RED}failed${NC}${NL}"
-        exit 1
+    if [[ ! -r "netdata-${LATEST_NETDATA_VERSION}.ipfire" ]]; then
+        wget "${GITHUB_PATH}${IPFIRE_PATCH}/netdata-${LATEST_NETDATA_VERSION}.ipfire" &>/dev/null
+        RET_CODE_DL=$?
+        if [[ $RET_CODE_DL -eq 0 ]]; then
+            echo -e " ${GREEN}done${NC}${NL}"
+        else
+            echo -e " ${RED}failed${NC}${NL}"
+            exit 1
+        fi
     fi
 }
 function test_addon() {
@@ -388,8 +404,8 @@ function update_script() {
     fi
 
     # Check fetched version
-    echo -en "${WHITE}Gathering fetched versions...${NC}"
-    LATEST_INSTALLER_VERSION=$(grep -i 'version' "$0" | awk '{ print $3 }' | head -n1)
+    echo -en "${WHITE}Checking fetched version...${NC}"
+    LATEST_INSTALLER_VERSION=$(get_version)
     if [[ -n $LATEST_INSTALLER_VERSION && ! "$CURRENT_INSTALLER_VERSION" == "$LATEST_INSTALLER_VERSION" ]]; then
         DO_INSTALLER_UPDATE=true
         echo -e " ${YELLOW}update available${NC}${NL}"
@@ -407,116 +423,6 @@ function update_script() {
         get_change_log
     fi
 }
-function manage_service() {
-    detect_addon
-
-    local LINE_TO_PATCH_POS
-    local PATCH_CONTENT
-    local FILE_TO_PATCH="/srv/web/ipfire/cgi-bin/services.cgi"
-    local LINE_TO_PATCH='print "</table></div>\n";'
-
-    LINE_TO_PATCH_POS=$(grep -n "$LINE_TO_PATCH" "$FILE_TO_PATCH" 2>/dev/null | awk '{ print $1 }' | sed -e 's/://')
-
-    # New line start
-    PATCH_CONTENT="\n\t"
-    PATCH_CONTENT+='<tr>'
-    PATCH_CONTENT+='<td style="text-align: left; background-color: black; color: white; width: 31%;">'
-    PATCH_CONTENT+='<a href="http://'$(hostname -f)':19999">netdata</a>'
-    PATCH_CONTENT+='</td>'
-    PATCH_CONTENT+='<td style="text-align: center; background-color: black; color: white;">'
-    PATCH_CONTENT+='<input type="checkbox" checked="checked" disabled>'
-    PATCH_CONTENT+='</td>'
-
-    # TODO: Make this part dynamic
-    PATCH_CONTENT+='<td style="text-align: center; background-color: black; color: white; width: 8%;">'
-    PATCH_CONTENT+='<img alt="Stop" title="Stop" src="/images/go-down.png" border="0">'
-    PATCH_CONTENT+='</td>'
-    PATCH_CONTENT+='<td style="text-align: center; background-color: black; color: white; width: 8%;">'
-    PATCH_CONTENT+='<img alt="Restart" title="Restart" src="/images/reload.gif" border="0">'
-    PATCH_CONTENT+='</td>'
-    PATCH_CONTENT+='<td style="text-align: center; background-color: #339933; color: white;">'
-    PATCH_CONTENT+='<strong>RUNNING</strong>'
-    PATCH_CONTENT+='</td>'
-    PATCH_CONTENT+='<td style="text-align: center; background-color: black; color: white;">'
-    PATCH_CONTENT+='PID'
-    PATCH_CONTENT+='</td>'
-    PATCH_CONTENT+='<td style="text-align: center; background-color: black; color: white;">'
-    PATCH_CONTENT+='MEMSIZE'
-    PATCH_CONTENT+='</td>'
-    # END TODO
-
-    # New line end
-    PATCH_CONTENT+='</tr>'
-    PATCH_CONTENT+="\n\t${LINE_TO_PATCH}"
-
-    echo -en "${WHITE}Detecting Netdata add-on service operation...${NC}"
-    if [[ -z $SERVICE_OP ]]; then
-        echo -e " ${RED}failed${NC}${NL}"
-        echo -e "${YELLOW}Supported service operations: 'test' or 'add' or 'remove' only.${NC}${NL}"
-        exit 1
-    else
-        echo -e " ${WHITE}[${YELLOW}${SERVICE_OP}${WHITE}]${NC}${NL}"
-    fi
-
-    # Define service operation code
-    case $SERVICE_OP in
-        test)
-            echo -en "${WHITE}Testing ${PURPLE}Netdata${WHITE} service...${NC}"
-            if [[ $DEBUG_MODE == true ]]; then
-                echo -e "${PURPLE}[DEBUG] ${WHITE}Running: ${NC}'$NETDATA_INSTALL_PATH/usr/sbin/netdatacli ping'${NL}"
-                exit 1
-            else
-                if [[ $("$NETDATA_INSTALL_PATH"/usr/sbin/netdatacli ping 2>/dev/null) == "pong" ]]; then
-                    echo -e " ${GREEN}running${NC}${NL}"
-                else
-                    echo -e " ${RED}stopped${NC}${NL}"
-                fi
-            fi
-            echo -e "${WHITE}Done.${NC}${NL}"
-        ;;
-        add)
-            # Run sanity check prior making any changes
-            sanity_check
-
-            echo -en "${WHITE}Installing ${PURPLE}services${WHITE} patch...${NC}"
-            if [[ $DEBUG_MODE == true ]]; then
-                echo -e "${PURPLE}[DEBUG] ${WHITE}Running: ${NC}'sed -e 's|'\"$LINE_TO_PATCH\"'|'\"$PATCH_CONTENT\"'|' -i \"$FILE_TO_PATCH\"'${NL}"
-                exit 1
-            else
-                cp -a "$FILE_TO_PATCH" "${FILE_TO_PATCH}.before-patch"
-                sed -e 's|'"$LINE_TO_PATCH"'|'"$PATCH_CONTENT"'|' -i "$FILE_TO_PATCH"
-                RET_CODE_PATCH=$?
-                if [[ $RET_CODE_PATCH -eq 0 ]]; then
-                    echo -e " ${GREEN}done${NC}${NL}"
-                else
-                    echo -e " ${RED}failed${NC}${NL}"
-                fi
-            fi
-        ;;
-        remove)
-            echo -en "${WHITE}Removing ${PURPLE}services${WHITE} patch...${NC}"
-            if [[ $DEBUG_MODE == true ]]; then
-                echo -e "${PURPLE}[DEBUG] ${WHITE}Running: ${NC}'mv \"$FILE_TO_PATCH.before-patch\" \"$FILE_TO_PATCH\"'${NL}"
-                exit 1
-            else
-                if [[ -f "$FILE_TO_PATCH.before-patch" ]]; then
-                    cp -a "$FILE_TO_PATCH" "$FILE_TO_PATCH.restore-patch"
-                    mv "$FILE_TO_PATCH.before-patch" "$FILE_TO_PATCH"
-                    RET_CODE_REMOVE=$?
-                    if [[ $RET_CODE_REMOVE -eq 0 ]]; then
-                        echo -e " ${GREEN}done${NC}${NL}"
-                    else
-                        echo -e " ${RED}failed${NC}${NL}"
-                    fi
-                fi
-            fi
-        ;;
-        *)
-            echo -e "${RED}Error: ${YELLOW}Invalid service operations given. Please specify 'test' or 'add' or 'remove' only.${NC}${NL}"
-            exit 1
-        ;;
-    esac
-}
 
 # Header
 [[ $1 == "--no-header" || $2 == "--no-header" ]] && NO_HEADER=true
@@ -524,23 +430,33 @@ if [[ ! $NO_HEADER == true ]]; then
     echo -e "${NL}${BLUE}Basic Netdata ${PURPLE}install/update/remove${BLUE} script for IPFire - ${GREEN}v$(get_version)${NC}${NL}"
 fi
 
-# Usage
-[[ $1 == "-h" || $1 == "--help" ]] && echo -e "${NL}Usage: $(basename "$0") [-r|--remove, -R|--reset, -u|--update, -s|--service, -v|--version, -c|--changelog, -f|--fix-perms]${NL}" && exit 1
+# Init
+check_deps
 
 # Arguments
-[[ $1 == "-R" || $1 == "--reset" ]] && RESET_MODE=true
-[[ $1 == "-r" || $1 == "--remove" ]] && REMOVE_MODE=true
-[[ $1 == "-u" || $1 == "--update" ]] && UPDATE_MODE=true
-[[ $1 == "-s" || $1 == "--service" ]] && SERVICE_MODE=true
-[[ $1 == "-f" || $1 == "--fix-perms" ]] && FIX_MODE=true
-[[ $2 == "--no-fix" ]] && FIX_PERMS_DURING_INSTALL=false
-[[ $1 == "-v" || $1 == "--version" ]] && get_installer_version && exit 1
-[[ $1 == "-c" || $1 == "--changelog" ]] && get_change_log && exit 1
+while [[ $# -ne 0 ]]; do
+    case $1 in
+        -h|--help) print_usage ;;
+        -R|--reset) RESET_MODE=true ; shift ;;
+        -r|--remove) REMOVE_MODE=true ; shift ;;
+        -u|--update) UPDATE_MODE=true ; shift ;;
+        -s|--script-update) UPDATE_SCRIPT=true ; shift ;;
+        -f|--fix-perms) FIX_MODE=true ; shift ;;
+        --no-fix) FIX_PERMS_DURING_INSTALL=false ; shift ;;
+        -v|--version)
+            get_installer_version
+            exit
+        ;;
+        -c|--changelog)
+            get_change_log
+            exit
+        ;;
+        *) die "Invalid argument given: $1" ;;
+    esac
+done
 
 # Checks
-[[ $(id -u) -ne 0 ]] && echo -e "${RED}Error: ${YELLOW}You must run this script as 'root' or with 'sudo'.${NC}${NL}" && exit 1
-[[ $# -eq 1 && $SERVICE_MODE == true ]] && echo -e "${RED}Error: ${YELLOW}Missing argument. Please specify 'test' or 'add' or 'remove' operation.${NC}${NL}" && exit 1
-[[ $# -gt 2 ]] && echo -e "${RED}Error: ${YELLOW}Too many arguments.${NC}${NL}" && exit 1
+[[ $(id -u) -ne 0 ]] && die "You must run this script as 'root' or with 'sudo'."
 
 # Main
 if [[ $RESET_MODE == true ]]; then
@@ -549,11 +465,8 @@ elif [[ $REMOVE_MODE == true ]]; then
     remove_addon
 elif [[ $UPDATE_MODE == true ]]; then
     update_addon
-elif [[ $SERVICE_MODE == true ]]; then
-    [[ $2 == "add" ]] && SERVICE_OP="add"
-    [[ $2 == "rm" || $2 == "remove" ]] && SERVICE_OP="remove"
-    [[ $2 == "test" ]] && SERVICE_OP="test"
-    manage_service
+elif [[ $UPDATE_SCRIPT == true ]]; then
+    update_script
 elif [[ $FIX_MODE == true ]]; then
     fix_perms
 else
