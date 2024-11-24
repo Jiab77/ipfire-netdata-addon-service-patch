@@ -1,6 +1,10 @@
+<div align="center">
+
 # Netdata add-on installer and service patch for IPFire <!-- omit from toc -->
 
 Simple Netdata add-on installer and service patch for the IPFire web interface.
+
+</div>
 
 ## Current versions <!-- omit from toc -->
 
