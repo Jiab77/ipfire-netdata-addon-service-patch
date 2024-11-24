@@ -1,6 +1,6 @@
-# Netdata add-on service patch for IPFire <!-- omit from toc -->
+# Netdata add-on installer and service patch for IPFire <!-- omit from toc -->
 
-Simple patch for adding Netdata add-on service to the IPFire web interface.
+Simple Netdata add-on installer and service patch for the IPFire web interface.
 
 ## Current versions <!-- omit from toc -->
 
@@ -34,8 +34,7 @@ The installer script will allow you to do the following:
 * Install / Update / Remove / Reset the add-on
 * Fix broken permissions
 * Backup and restore config files when running `remove` or `reset` commands
-* Add / Remove the patch on the __services__ page (__not implemented yet__)
-* Test the Netdata service
+* Add / Remove the patch on the __services__ page (__removed__)
 
 ## Installation
 
@@ -300,4 +299,4 @@ Huge thanks to [@siosios](https://github.com/siosios) for his work on the [Netda
 
 ## Author
 
-* __Jiab77__
+* [Jiab77](https://community.ipfire.org/u/jiab77)
